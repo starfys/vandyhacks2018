@@ -43,16 +43,19 @@ const taskModule = {
       const data = await api.list(user);
       commit("setTaskList", data);
     },
+    // Add a task to the backend
     async addTask({ rootState, dispatch, commit }, task) {
       const user = rootState.auth.user;
       const returnedTask = await api.tasks.add(user, task);
       await dispatch("updateTaskList");
     },
+    // Begin the "add a task" workflow
     beginAddingTask({commit}) {
       router.push("/task/add");
       commit("initTaskAdd");
     },
-    async finishAddingTask({state, commit}) {
+    // Finish the "add a task" workflow
+    async finishAddingTask({state, commit, dispatch}) {
       const task = state.taskAdd.currentTask;
       await dispatch("addTask", task);
       commit("resetTaskAdd");
