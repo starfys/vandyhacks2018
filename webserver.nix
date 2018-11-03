@@ -48,7 +48,7 @@
     users.users.api = {
       createHome = true;
       description = "Used for API daemon";
-      hashedPassword = "$6$rounds=1000000$HDzFLWCTA$knAEZzKKpAh0HBwFjA9bm/dolrOGibyJxeykHCtnKzvR1qKoQdSdnY6AzZYABinPP9WHNi2ApcsucDbTM7cV41";
+      hashedPassword = "!";
     };
     # Deployment details
     deployment.targetEnv = "digitalOcean";
