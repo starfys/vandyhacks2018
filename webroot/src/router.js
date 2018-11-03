@@ -1,6 +1,8 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Home from "./views/Home.vue";
+
+import TaskList from "@/views/TaskList.vue";
+import AddTask from "@/views/AddTask.vue";
 
 Vue.use(Router);
 
@@ -10,8 +12,17 @@ export default new Router({
   routes: [
     {
       path: "/",
-      name: "home",
-      component: Home
+      redirect: "/tasks",
+    },
+    {
+      path: "/tasks",
+      name: "taskList",
+      component: TaskList
+    },
+    {
+      path: "/tasks/add",
+      name: "addTask",
+      component: AddTask
     },
     {
       path: "/about",
