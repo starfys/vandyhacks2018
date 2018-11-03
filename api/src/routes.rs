@@ -11,12 +11,12 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// Adds an task
 // TODO: require cookie auth
 #[post("/task/add", format = "application/json", data = "<task>")]
-pub fn add_task(task: Json<TaskInsert>, db: db::DbConn) -> Result<&'static str, io::Error> {
+pub fn add_task(task: Json<TaskInsert>, db: db::DbConn) -> Result<Json<Task>, io::Error> {
     // Insert task into database
     diesel::insert_into(schema::tasks::table)
         .values(&*task)
-        .execute(&*db)
-        .map(|_| "")
+        .get_result::<Task>(&*db)
+        .map(|task| Json(task))
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
