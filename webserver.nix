@@ -19,14 +19,11 @@
         locations."/" = {
           root = "/var/www";
         };
+        locations."/api" = {
+          proxyPass = "http://localhost:8000";
+        };
       };
-      # virtualHosts."server.example.com" = {
-      #   forceSSL = true;
-      #   useACMEHost = "example.com";
-      #   locations."/" = {
-      #     proxyPass = "http://localhost:8888";
-      #   };
-      };
+    };
     # SSHD
     services.openssh = {
       enable = true;
