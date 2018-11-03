@@ -1,0 +1,4 @@
+-- Your SQL goes here
+ALTER TABLE work ALTER COLUMN duration SET DEFAULT 0;
+ALTER TABLE work ALTER COLUMN progress SET DEFAULT 0.0;
+ALTER TABLE work ALTER COLUMN finished SET DEFAULT false;
