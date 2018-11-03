@@ -1,3 +1,6 @@
 <template>
-  <p>Task list</p>
+  <section>
+    <v-icon name="cog" />
+    <p>Task list</p>
+  </section>
 </template>
