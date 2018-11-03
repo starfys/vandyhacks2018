@@ -46,8 +46,9 @@
     ];
     users.mutableUsers = false;
     users.users.api = {
-      createHome = true;
       description = "Used for API daemon";
+      isNormalUser = true;
+      createHome = true;
       hashedPassword = "!";
     };
     # Deployment details
