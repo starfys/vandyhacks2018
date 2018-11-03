@@ -10,8 +10,12 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Adds an task
 // TODO: require cookie auth
-#[post("/task/add", format = "application/json", data = "<task>")]
-pub fn add_task(task: Json<TaskInsert>, db: db::DbConn) -> Result<Json<Task>, io::Error> {
+#[post("/user/<user_id>/task", format = "application/json", data = "<task>")]
+pub fn add_task(
+    user_id: i64,
+    task: Json<TaskInsert>,
+    db: db::DbConn,
+) -> Result<Json<Task>, io::Error> {
     // Insert task into database
     diesel::insert_into(schema::tasks::table)
         .values(&*task)
@@ -22,8 +26,8 @@ pub fn add_task(task: Json<TaskInsert>, db: db::DbConn) -> Result<Json<Task>, io
 
 /// Removes an task
 // TODO: require cookie auth
-#[post("/task/remove/<task_id>")]
-pub fn remove_task(task_id: i64, db: db::DbConn) -> Result<&'static str, io::Error> {
+#[delete("/user/<user_id>/task/<task_id>")]
+pub fn remove_task(user_id: i64, task_id: i64, db: db::DbConn) -> Result<&'static str, io::Error> {
     use schema::tasks::dsl;
     // Remove user from database
     diesel::delete(dsl::tasks.filter(dsl::task_id.eq(task_id)))
@@ -32,10 +36,40 @@ pub fn remove_task(task_id: i64, db: db::DbConn) -> Result<&'static str, io::Err
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
+/// Removes an task
+// TODO: require cookie auth
+#[get("/user/<user_id>/task/<task_id>")]
+pub fn get_task(user_id: i64, task_id: i64, db: db::DbConn) -> Result<Json<Task>, io::Error> {
+    use schema::tasks::dsl;
+    // Remove user from database
+    dsl::tasks
+        .filter(dsl::owner_id.eq(user_id))
+        .filter(dsl::task_id.eq(task_id))
+        .limit(1)
+        .load::<Task>(&*db)
+        // Convert the error to io::Error
+        .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
+        // Only take the first task
+        .and_then(|task| {
+            task.into_iter()
+                .next()
+                .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Failed to find matching task"))
+        })
+        // Convert to json
+        .map(|task| Json(task))
+        // Fix error
+        .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
+}
+
 /// Modifies an task
 // TODO: require cookie auth
-#[post("/task/modify/<task_id>", format = "application/json", data = "<task>")]
+#[put(
+    "/user/<user_id>/task/<task_id>",
+    format = "application/json",
+    data = "<task>"
+)]
 pub fn modify_task(
+    user_id: i64,
     task_id: i64,
     task: Json<Task>,
     db: db::DbConn,
@@ -46,7 +80,7 @@ pub fn modify_task(
 
 /// Lists tasks
 // TODO: require cookie auth
-#[get("/task/list/<user_id>")]
+#[get("/user/<user_id>/task")]
 pub fn list_tasks(user_id: i64, db: db::DbConn) -> Result<Json<Vec<Task>>, io::Error> {
     use schema::tasks::dsl;
     dsl::tasks
@@ -66,8 +100,8 @@ pub fn list_tasks(user_id: i64, db: db::DbConn) -> Result<Json<Vec<Task>>, io::E
 
 /// Starts work
 // TODO: require cookie auth
-#[post("/work/start/<task_id>")]
-pub fn start_work(task_id: i64, db: db::DbConn) -> Result<&'static str, io::Error> {
+#[post("/user/<user_id>/task/<task_id>/start")]
+pub fn start_work(user_id: i64, task_id: i64, db: db::DbConn) -> Result<&'static str, io::Error> {
     // Get current time
     let time = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -91,11 +125,12 @@ pub fn start_work(task_id: i64, db: db::DbConn) -> Result<&'static str, io::Erro
 /// Finishes work
 // TODO: require cookie auth
 #[post(
-    "/work/finish/<task_id>",
+    "/user/<user_id>/task/<task_id>/finish",
     format = "application/json",
     data = "<finish_data>"
 )]
 pub fn finish_work(
+    user_id: i64,
     task_id: i64,
     finish_data: Json<WorkFinish>,
     db: db::DbConn,
@@ -132,9 +167,9 @@ pub fn finish_work(
     .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
-/// Finishes work
+/// Dumps the work database
 // TODO: require cookie auth
-#[get("/work/list")]
+#[get("/work")]
 pub fn list_work(db: db::DbConn) -> Result<Json<Vec<Work>>, io::Error> {
     use schema::work::dsl;
     dsl::work
@@ -148,7 +183,7 @@ pub fn list_work(db: db::DbConn) -> Result<Json<Vec<Work>>, io::Error> {
 
 /// Adds a user
 // TODO: require cookie auth
-#[post("/user/add", format = "application/json", data = "<user>")]
+#[post("/user", format = "application/json", data = "<user>")]
 pub fn add_user(user: Json<User>, db: db::DbConn) -> Result<&'static str, io::Error> {
     // Insert user into database
     diesel::insert_into(schema::users::table)
@@ -159,7 +194,7 @@ pub fn add_user(user: Json<User>, db: db::DbConn) -> Result<&'static str, io::Er
 }
 
 // TODO: require cookie auth
-#[post("/user/modify/<user_id>", format = "application/json", data = "<user>")]
+#[put("/user/<user_id>", format = "application/json", data = "<user>")]
 pub fn modify_user(
     user_id: i64,
     user: Json<User>,
@@ -169,7 +204,7 @@ pub fn modify_user(
 }
 /// Removes a user
 // TODO: require cookie auth
-#[post("/user/remove/<user_id>")]
+#[delete("/user/<user_id>")]
 pub fn remove_user(user_id: i64, db: db::DbConn) -> Result<&'static str, io::Error> {
     use schema::users::dsl;
     // Remove user from database
