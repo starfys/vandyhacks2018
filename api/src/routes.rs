@@ -101,7 +101,7 @@ pub fn list_tasks(user_id: i64, db: db::DbConn) -> Result<Json<Vec<Task>>, io::E
 /// Starts work
 // TODO: require cookie auth
 #[post("/user/<user_id>/task/<task_id>/start")]
-pub fn start_work(user_id: i64, task_id: i64, db: db::DbConn) -> Result<&'static str, io::Error> {
+pub fn start_work(user_id: i64, task_id: i64, db: db::DbConn) -> Result<Json<Work>, io::Error> {
     // Get current time
     let time = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -117,8 +117,8 @@ pub fn start_work(user_id: i64, task_id: i64, db: db::DbConn) -> Result<&'static
     // Insert task into database
     diesel::insert_into(schema::work::table)
         .values(&work_start)
-        .execute(&*db)
-        .map(|_| "")
+        .get_result::<Work>(&*db)
+        .map(|work| Json(work))
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
@@ -134,7 +134,7 @@ pub fn finish_work(
     task_id: i64,
     finish_data: Json<WorkFinish>,
     db: db::DbConn,
-) -> Result<&'static str, io::Error> {
+) -> Result<Json<Work>, io::Error> {
     use schema::work::dsl;
     // Extract from json
     // Add the time into the data
@@ -162,8 +162,8 @@ pub fn finish_work(
         dsl::meetings.eq(finish_data.meetings),
         dsl::breaks.eq(finish_data.breaks),
     ))
-    .execute(&*db)
-    .map(|_| "")
+    .get_result::<Work>(&*db)
+    .map(|work| Json(work))
     .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
