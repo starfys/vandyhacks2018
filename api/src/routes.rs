@@ -1,10 +1,17 @@
+use bcrypt;
 use diesel::prelude::*;
+use hex;
+use rand::Rng;
+use rocket::http::Status;
+use rocket::request::{self, FromRequest};
+use rocket::{Outcome, Request, State};
 use rocket_contrib::json::Json;
 
 use db;
 use models::*;
 use schema;
 
+use std::collections::HashMap;
 use std::io;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -167,6 +174,28 @@ pub fn finish_work(
     .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
+/// Manually inserts work
+// TODO: require cookie auth
+#[post(
+    "/user/<user_id>/task/<task_id>/work",
+    format = "application/json",
+    data = "<work>"
+)]
+pub fn add_work(
+    user_id: i64,
+    task_id: i64,
+    work: Json<WorkInsert>,
+    db: db::DbConn,
+) -> Result<Json<Work>, io::Error> {
+    use schema::work::dsl;
+    // Insert task into database
+    diesel::insert_into(dsl::work)
+        .values(&*work)
+        .get_result::<Work>(&*db)
+        .map(|work| Json(work))
+        .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
+}
+
 /// Dumps the work database
 // TODO: require cookie auth
 #[get("/work")]
@@ -184,7 +213,10 @@ pub fn list_work(db: db::DbConn) -> Result<Json<Vec<Work>>, io::Error> {
 /// Adds a user
 // TODO: require cookie auth
 #[post("/user", format = "application/json", data = "<user>")]
-pub fn add_user(user: Json<User>, db: db::DbConn) -> Result<&'static str, io::Error> {
+pub fn add_user(mut user: Json<User>, db: db::DbConn) -> Result<&'static str, io::Error> {
+    // Replace the user's password with a hashed version
+    user.password = bcrypt::hash(&user.password, bcrypt::DEFAULT_COST)
+        .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
     // Insert user into database
     diesel::insert_into(schema::users::table)
         .values(&*user)
@@ -212,4 +244,77 @@ pub fn remove_user(user_id: i64, db: db::DbConn) -> Result<&'static str, io::Err
         .execute(&*db)
         .map(|_| "")
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
+}
+
+/// Manages users
+pub struct UserManager {
+    cookies: HashMap<i64, String>,
+}
+
+impl UserManager {
+    pub fn new() -> Self {
+        UserManager {
+            cookies: HashMap::new(),
+        }
+    }
+    pub fn cookie_is_valid(&self, user_id: i64, cookie: String) -> bool {
+        self.cookies.get(&user_id) == Some(&cookie)
+    }
+    pub fn generate_cookie(&mut self, user_id: i64) -> String {
+        // Generate random bytes
+        let mut rng = rand::thread_rng();
+        let bytes: Vec<u8> = (0..64).map(|_| rng.gen()).collect();
+        // Encode bytes as hex
+        let cookie = hex::encode(&bytes);
+        // Store the cookie
+        self.cookies.insert(user_id, cookie.clone());
+        // Return the cookie
+        cookie
+    }
+}
+
+/// Request to log in
+#[derive(Serialize, Deserialize)]
+pub struct LoginRequest {
+    /// username
+    username: String,
+    /// password
+    password: String,
+}
+/// Response to a login request
+#[derive(Serialize, Deserialize)]
+pub struct LoginResponse {
+    /// Whether the login succeeded
+    success: bool,
+}
+/// Attempts to log a user in
+#[post("/login", format = "application/json", data = "<login_data>")]
+pub fn login(
+    login_data: Json<LoginRequest>,
+    db: db::DbConn,
+) -> Result<Json<LoginResponse>, io::Error> {
+    use schema::users::dsl;
+    // Load entry for user
+    dsl::users
+        .filter(dsl::name.eq(login_data.username.clone()))
+        .limit(1)
+        .load::<User>(&*db)
+        // Convert the error to io::Error
+        .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
+        // Only take the first task
+        .and_then(|task| {
+            task.into_iter()
+                .next()
+                .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Failed to find matching task"))
+        })
+        // Verify the user's password
+        .and_then(|user| {
+            bcrypt::verify(&(login_data.password), &user.password)
+                // Return both success and user id
+                .map(|success| (success, user.user_id))
+                // Fix error
+                .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
+        })
+        // Create response
+        .map(|(success, user_id)| Json(LoginResponse { success }))
 }

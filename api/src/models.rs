@@ -52,12 +52,12 @@ pub struct TaskInsert {
 #[table_name = "users"]
 pub struct User {
     /// Unique identifier
-    user_id: i64,
+    pub user_id: i64,
     /// username
-    name: String,
+    pub name: String,
     /// password
     /// TODO: hash and salt
-    password: String,
+    pub password: String,
 }
 
 /// Work done on a task
@@ -116,4 +116,30 @@ pub struct WorkFinish {
     pub meetings: Option<i64>,
     /// Number of breaks taken
     pub breaks: Option<i64>,
+}
+
+/// Version of work struct for inserting into table
+#[derive(Deserialize, Insertable, Queryable, Serialize)]
+#[table_name = "work"]
+pub struct WorkInsert {
+    /// uid of the work this is being done o
+    task_id: i64,
+    /// Time the user started this work
+    start_time: i64,
+    /// Amount of time the user worked
+    end_time: i64,
+    /// Amount of progress the user made
+    progress: f64,
+    /// Whether the user finished the task with this work session
+    finished: bool,
+    /// Whether the user listened to music during this work session
+    music: Option<bool>,
+    /// Number of times the user was interrupted during this work session
+    interruptions: Option<i64>,
+    /// How noisy was the area during this work session
+    noise: Option<f64>,
+    /// How many meetings occurred during the work session
+    meetings: Option<i64>,
+    /// Number of breaks taken
+    breaks: Option<i64>,
 }
