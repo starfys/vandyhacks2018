@@ -19,14 +19,11 @@
         locations."/" = {
           root = "/var/www";
         };
+        locations."/api" = {
+          proxyPass = "http://localhost:8000";
+        };
       };
-      # virtualHosts."server.example.com" = {
-      #   forceSSL = true;
-      #   useACMEHost = "example.com";
-      #   locations."/" = {
-      #     proxyPass = "http://localhost:8888";
-      #   };
-      };
+    };
     # SSHD
     services.openssh = {
       enable = true;
@@ -45,6 +42,12 @@
       tmux
     ];
     users.mutableUsers = false;
+    users.users.api = {
+      description = "Used for API daemon";
+      isNormalUser = true;
+      createHome = true;
+      hashedPassword = "!";
+    };
     # Deployment details
     deployment.targetEnv = "digitalOcean";
     deployment.digitalOcean.enableIpv6 = true;
