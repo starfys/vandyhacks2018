@@ -48,7 +48,8 @@ print("Creating new dataset on Microstrategy")
 dataset_id, new_table_id = conn.create_dataset(data_frame=df,
                                                dataset_name=dataset_name,
                                                table_name=table_name,
-                                               to_attribute=['task_id'])
+                                               to_attribute=['work_id',
+                                                             'task_id'])
 
 
 run(host="localhost", port=8080, debug=True)
