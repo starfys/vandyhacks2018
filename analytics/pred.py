@@ -12,7 +12,7 @@ from keras.optimizers import Adam
 import keras.backend as K
 
 DATA_DIR = "data"
-quiet_csv = os.path.join(DATA_DIR, "quiet.csv")
+quiet_csv = os.path.join(DATA_DIR, "initial_data.csv")
 
 df = pd.read_csv(quiet_csv)
 
@@ -20,6 +20,7 @@ df = pd.read_csv(quiet_csv)
 columns = df.columns
 drop = ['task_id', 
         'work_id',
+        'finished',
         'start_time', 
         'end_time',
         'progress']

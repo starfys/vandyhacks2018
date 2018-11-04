@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import json
 
+from sklearn.utils import shuffle
+
 from keras.utils import to_categorical
 from keras.engine import Input, Model
 from keras.layers import Dense, Flatten
@@ -11,7 +13,7 @@ from keras.optimizers import Adam
 import keras.backend as K
 
 DATA_DIR = "data"
-quiet_csv = os.path.join(DATA_DIR, "quiet.csv")
+quiet_csv = os.path.join(DATA_DIR, "initial_data.csv")
 
 df = pd.read_csv(quiet_csv)
 
@@ -19,6 +21,7 @@ df = pd.read_csv(quiet_csv)
 columns = df.columns
 drop = ['task_id', 
         'work_id',
+        'finished',
         'start_time', 
         'end_time',]
 # prune unused features
@@ -36,12 +39,15 @@ X = df.drop('progress', axis=1)
 # normalize X with column-wise linear downscale
 X = X.divide(X.max(axis=0))
 
+
+X, y = shuffle(X, y, random_state=0)
+
 # build basic dnn
 def dnn(input_shape, model_path, lr=1e-4, verbose=0):
     inputs = Input(shape=input_shape[1:])
 
     x = Dense(64, activation='relu')(inputs)
-    x = Dense(16, activation='relu')(x)
+    x = Dense(32, activation='relu')(x)
     x = Dense(1)(x)
     
     outputs = Activation('sigmoid')(x)
@@ -68,9 +74,9 @@ model_path = os.path.join("models", "dnn.json")
 model = dnn(X.shape, model_path, verbose=1)
 
 model.fit(X, y, 
-          epochs=10000,
+          epochs=1000,
           batch_size=1024,
-          validation_split=0.2,
+          validation_split=0.5,
           verbose=1)
 
 model.save(os.path.join("models", "weights.hdf5"))

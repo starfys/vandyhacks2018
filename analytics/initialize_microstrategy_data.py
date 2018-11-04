@@ -13,7 +13,7 @@ DATA_DIR = "data"
 
 ###########
 
-data = os.path.join(DATA_DIR, "quiet.csv")
+data = os.path.join(DATA_DIR, "initial_data.csv")
 df = pd.read_csv(data, index_col=False)
 
 dataset_name = 'base_dataset'
@@ -37,9 +37,8 @@ with open(os.path.join(DATA_DIR, "base_dataset_ids.txt"), 'w') as f:
 
 ###########
 
-'''
 
-data = os.path.join(DATA_DIR, "quiet.csv")
+data = os.path.join(DATA_DIR, "predictions.csv")
 df = pd.read_csv(data, index_col=False)
 
 dataset_name = 'pred_dataset'
@@ -60,5 +59,3 @@ dataset_id, new_table_id = conn.create_dataset(data_frame=df,
 
 with open(os.path.join(DATA_DIR, "pred_dataset_ids.txt"), 'w') as f:
     f.write(dataset_id + '\n' + new_table_id)
-
-'''

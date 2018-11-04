@@ -109,15 +109,12 @@ columns = ['task_id',
            'progress']
 
 
-loud_dataset = np.array([gen_loud_row() for x in range(10000)])
+loud_dataset = np.array([gen_loud_row() for x in range(3000)])
 loud_df = pd.DataFrame(data=loud_dataset, columns=columns)
 
-quiet_dataset = np.array([gen_quiet_row() for x in range(10000)])
+quiet_dataset = np.array([gen_quiet_row() for x in range(7000)])
 quiet_df = pd.DataFrame(data=quiet_dataset, columns=columns)
 
-
-loud_df.to_json("loud.json"))
-loud_df.to_csv("loud.csv"), index=False)
-
-quiet_df.to_json("quiet.json"))
-quiet_df.to_csv("quiet.csv"), index=False)
+seeded_df = quiet_df.append(loud_df, ignore_index=True)
+seeded_df.to_json("initial_data.json")
+seeded_df.to_csv("initial_data.csv", index=False)
