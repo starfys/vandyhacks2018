@@ -12,7 +12,14 @@ export default {
       return res.data;
     },
     async add(user, task) {
-      const res = await api.post(`/user/${user.id}/task`, task);
+      const res = await api.post(`/user/${user.id}/task`, {
+        owner_id: user.id,
+        created: Date.now() * 1000,
+        importance: 0,
+        due: task.due * 1000,
+        name: task.name,
+        description: task.description,
+      });
 
       return res.data;
     },
@@ -43,7 +50,7 @@ export default {
   },
 
   users: {
-    async add(user, userData) {
+    async add() {
       const res = await api.post(`/user`);
 
       return res.data;
