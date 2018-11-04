@@ -16,7 +16,7 @@ def get_new_work():
     # send to MS
     # return success=happy
     
-    df = pd.read_json(request.json, typ='series', convert_dates=False).to_frame().T
+    df = pd.read_json(json.dumps(request.json), typ='series', convert_dates=False).to_frame().T
     
     print("Adding to dataset on Microstrategy")
     conn.update_dataset(data_frame=df, 
