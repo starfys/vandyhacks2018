@@ -48,6 +48,7 @@ fn main() -> Result<(), io::Error> {
                 list_tasks,
                 start_work,
                 finish_work,
+                add_work,
                 list_work,
                 add_user,
                 remove_user,
