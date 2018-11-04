@@ -6,6 +6,7 @@ extern crate diesel;
 extern crate dotenv;
 extern crate hex;
 extern crate rand;
+extern crate reqwest;
 #[macro_use]
 extern crate rocket;
 extern crate rocket_contrib;
@@ -47,6 +48,7 @@ fn main() -> Result<(), io::Error> {
                 list_tasks,
                 start_work,
                 finish_work,
+                add_work,
                 list_work,
                 add_user,
                 remove_user,

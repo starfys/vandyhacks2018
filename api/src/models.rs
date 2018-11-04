@@ -123,23 +123,23 @@ pub struct WorkFinish {
 #[table_name = "work"]
 pub struct WorkInsert {
     /// uid of the work this is being done o
-    task_id: i64,
+    pub task_id: i64,
     /// Time the user started this work
-    start_time: i64,
+    pub start_time: i64,
     /// Amount of time the user worked
-    end_time: i64,
+    pub end_time: i64,
     /// Amount of progress the user made
-    progress: f64,
+    pub progress: f64,
     /// Whether the user finished the task with this work session
-    finished: bool,
+    pub finished: bool,
     /// Whether the user listened to music during this work session
-    music: Option<bool>,
+    pub music: Option<bool>,
     /// Number of times the user was interrupted during this work session
-    interruptions: Option<i64>,
+    pub interruptions: Option<i64>,
     /// How noisy was the area during this work session
-    noise: Option<f64>,
+    pub noise: Option<f64>,
     /// How many meetings occurred during the work session
-    meetings: Option<i64>,
+    pub meetings: Option<i64>,
     /// Number of breaks taken
-    breaks: Option<i64>,
+    pub breaks: Option<i64>,
 }
