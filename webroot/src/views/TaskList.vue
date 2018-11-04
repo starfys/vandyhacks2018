@@ -4,9 +4,9 @@
       v-for="task in taskList"
       v-bind:key="task.id"
       v-bind:task="task"
-      :active="false"
+      :active="task.in_progress"
       class="task-item"></task-card>
-    <button class="fab" v-on:click="newTask()">
+    <button class="fab" to="/tasks/add">
       <v-icon class="square" name="plus" scale="2.3" />
     </button>
   </section>
@@ -66,9 +66,6 @@ export default {
     ...mapActions([
       "updateTaskList",
     ]),
-    newTask() {
-      this.$router.push("/tasks/add");
-    },
   },
 };
 </script>
