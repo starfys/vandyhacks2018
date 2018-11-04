@@ -121,8 +121,17 @@ pub fn start_work(user_id: i64, task_id: i64, db: db::DbConn) -> Result<Json<Wor
         start_time: time as i64,
         end_time: -1,
     };
+    // Update task to indicate that it is in progress
+    {
+        use schema::tasks::dsl;
+        diesel::update(dsl::tasks.filter(dsl::task_id.eq(task_id)))
+            .set((dsl::in_progress.eq(true),))
+            .execute(&*db)
+            .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
+    }
     // Insert task into database
-    diesel::insert_into(schema::work::table)
+    use schema::work::dsl;
+    diesel::insert_into(dsl::work)
         .values(&work_start)
         .get_result::<Work>(&*db)
         .map(|work| Json(work))
@@ -153,6 +162,18 @@ pub fn finish_work(
             .map(|time| time.as_secs() * 1_000_000 + u64::from(time.subsec_micros()))
             .unwrap_or(0) as i64
     });
+    // Update master task table
+    {
+        use schema::tasks::dsl;
+        diesel::update(dsl::tasks.filter(dsl::task_id.eq(task_id)))
+            .set((
+                dsl::in_progress.eq(false),
+                dsl::progress.eq(dsl::progress + finish_data.progress),
+                dsl::completed.eq((dsl::progress + finish_data.progress).ge(1.0)),
+            ))
+            .execute(&*db)
+            .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
+    }
     // Insert task into database
     diesel::update(
         dsl::work
@@ -170,7 +191,12 @@ pub fn finish_work(
         dsl::breaks.eq(finish_data.breaks),
     ))
     .get_result::<Work>(&*db)
-    .map(|work| Json(work))
+    .map(|work| {
+        // Pass data to ms upload daemon
+        let client = reqwest::Client::new();
+        client.post("http://localhost:8080/work").json(&work).send();
+        Json(work)
+    })
     .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
@@ -188,11 +214,28 @@ pub fn add_work(
     db: db::DbConn,
 ) -> Result<Json<Work>, io::Error> {
     use schema::work::dsl;
+    {
+        use schema::tasks::dsl;
+        diesel::update(dsl::tasks.filter(dsl::task_id.eq(task_id)))
+            .set((
+                dsl::in_progress.eq(false),
+                dsl::progress.eq(dsl::progress + work.progress),
+                dsl::completed.eq((dsl::progress + work.progress).ge(1.0)),
+            ))
+            .execute(&*db)
+            .map_err(|err| io::Error::new(io::ErrorKind::Other, err))?;
+    }
     // Insert task into database
     diesel::insert_into(dsl::work)
         .values(&*work)
         .get_result::<Work>(&*db)
-        .map(|work| Json(work))
+        .map(|work| {
+            // Pass data to ms upload daemon
+            let client = reqwest::Client::new();
+            client.post("http://localhost:8080/work").json(&work).send();
+            // Convert data to json for returning
+            Json(work)
+        })
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
