@@ -41,9 +41,13 @@ export default {
 
       return res.data;
     },
-    async finish(user, taskId, workData) {
+    async finish(user, taskId, updatedProgress, questionAnswers) {
       const res = await api.post(
-        `/user/${user.id}/task/${taskId}/finish`, workData);
+        `/user/${user.id}/task/${taskId}/finish`, {
+          finished: false,
+          progress: updatedProgress,
+          ...questionAnswers,
+        });
 
       return res.data;
     },

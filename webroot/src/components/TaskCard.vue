@@ -3,8 +3,15 @@
     <div class="shelf">
       <h3 class="title"><b-badge class="shelf-badge">{{task.progress}}%</b-badge> {{task.name}}</h3>
       <b-btn-group>
-        <b-btn :href="editTaskUrl"><v-icon name="edit" scale="1" /></b-btn>
-        <b-btn @click="startWorkOnTask"><v-icon :name="active ? 'stop' : 'play'" scale="1" /></b-btn>
+        <b-btn :href="editTaskUrl">
+          <v-icon name="edit" scale="1" />
+        </b-btn>
+        <b-btn v-if="active" @click="stopWorkOnTask">
+          <v-icon name="stop" scale="1" />
+        </b-btn>
+        <b-btn v-else @click="startWorkOnTask">
+          <v-icon name="play" scale="1" />
+        </b-btn>
       </b-btn-group>
     </div>
     <b-progress
@@ -39,6 +46,8 @@
 </style>
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
   name: "TaskCard",
 
@@ -54,8 +63,15 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      "startWork",
+    ]),
     startWorkOnTask() {
-      console.log("Stub for startWorkOnTask.");
+      //console.log("Stub for startWorkOnTask.");
+      this.startWork(this.task.task_id);
+    },
+    stopWorkOnTask() {
+      this.$router.push(`/tasks/${this.task.task_id}/work`);
     },
   },
 };

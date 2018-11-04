@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import api from "@/api";
-import router from "@/router";
+//import router from "@/router";
 
 Vue.use(Vuex);
 
@@ -59,15 +59,40 @@ const taskModule = {
       commit("setTaskList", data);
     },
     // Add a task to the backend
-    async addTask({ rootState, dispatch, commit }, task) {
+    async addTask({ rootState, dispatch }, task) {
       const user = rootState.auth.user;
       const data = await api.tasks.add(user, task);
       await dispatch("updateTaskList");
       return data;
     },
-    async modifyTask({ rootState, dispatch, commit }, taskId, task) {
+    async modifyTask({ rootState, dispatch}, taskId, task) {
       const user = rootState.auth.user;
       const data = await api.tasks.modify(user, taskId, task);
+      await dispatch("updateTaskList");
+      return data;
+    },
+  },
+};
+
+const workModule = {
+  /*state: {
+    inProgressTaskId: "",
+  },
+
+  getters: {
+    isTaskActive: state => state.inProgressTaskId != "",
+  },*/
+  
+  actions: {
+    async startWork({ rootState, dispatch}, taskId) {
+      const user = rootState.auth.user;
+      const data = await api.work.start(user, taskId);
+      await dispatch("updateTaskList");
+      return data;
+    },
+    async finishWork({ rootState, dispatch}, taskId, workData) {
+      const user = rootState.auth.user;
+      const data = await api.work.finish(user, taskId, workData);
       await dispatch("updateTaskList");
       return data;
     },
@@ -78,9 +103,11 @@ const store = new Vuex.Store({
   modules: {
     tasks: taskModule,
     auth: authModule,
+    work: workModule,
   },
 });
 
 // initial setup of store:
 store.dispatch("updateTaskList");
+
 export default store;
