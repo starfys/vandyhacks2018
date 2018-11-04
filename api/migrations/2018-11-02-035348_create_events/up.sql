@@ -1,11 +1,13 @@
 -- Your SQL goes here
-CREATE TABLE events (
-  event_id BIGSERIAL PRIMARY KEY,
-  user_id BIGSERIAL,
+CREATE TABLE tasks (
+  task_id BIGSERIAL PRIMARY KEY,
+  owner_id BIGSERIAL,
   name VARCHAR NOT NULL,
-  description TEXT,
-  begin_timestamp VARCHAR NOT NULL,
-  end_timestamp VARCHAR NOT NULL,
-  recurrence VARCHAR NOT NULL,
-  importance BIGINT NOT NULL
+  description TEXT NOT NULL,
+  created BIGINT NOT NULL,
+  due BIGINT NOT NULL,
+  importance DOUBLE PRECISION NOT NULL,
+  in_progress BOOLEAN NOT NULL,
+  progress DOUBLE PRECISION NOT NULL,
+  completed BOOLEAN NOT NULL
 )
