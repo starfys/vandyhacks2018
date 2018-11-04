@@ -40,6 +40,13 @@
       rxvt_unicode.terminfo
       # Persistence
       tmux
+      # Python
+      (pkgs.python3.withPackages (ps: with ps; [virtualenv pip]))
+      # Build tools
+      binutils.bintools
+      gcc
+      gnumake
+      pkgconfig
     ];
     users.mutableUsers = false;
     users.users.api = {
