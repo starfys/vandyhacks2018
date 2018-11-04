@@ -170,7 +170,12 @@ pub fn finish_work(
         dsl::breaks.eq(finish_data.breaks),
     ))
     .get_result::<Work>(&*db)
-    .map(|work| Json(work))
+    .map(|work| {
+        // Pass data to ms upload daemon
+        let client = reqwest::Client::new();
+        client.post("http://localhost:8080/work").json(&work).send();
+        Json(work)
+    })
     .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
@@ -192,7 +197,13 @@ pub fn add_work(
     diesel::insert_into(dsl::work)
         .values(&*work)
         .get_result::<Work>(&*db)
-        .map(|work| Json(work))
+        .map(|work| {
+            // Pass data to ms upload daemon
+            let client = reqwest::Client::new();
+            client.post("http://localhost:8080/work").json(&work).send();
+            // Convert data to json for returning
+            Json(work)
+        })
         .map_err(|err| io::Error::new(io::ErrorKind::Other, err))
 }
 
