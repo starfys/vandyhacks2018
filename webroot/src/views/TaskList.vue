@@ -2,7 +2,7 @@
   <section>
     <task-card
       :animate="true"
-      v-for="task in tasks"
+      v-for="task in taskList"
       v-bind:key="task.id"
       v-bind:task="task"
       class="task-item"></task-card>
@@ -34,34 +34,37 @@
 </style>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, } from "vuex";
 
 import TaskCard from "@/components/TaskCard.vue";
 
 export default {
   name: "TaskList",
+
   data() {
-    return {
-      tasks: [
-        {name: "Name", id:"tets", progress:10},
-        {name: "Take over the world", id: "meem", progress: 70},
-      ],
-    };
+    return {};
   },
+
+  created() {
+    this.updateTaskList();
+  },
+
   computed: {
     ...mapState({
       taskList: state => state.tasks.taskList.tasks,
     }),
   },
+
   components: {
     TaskCard,
   },
+
   methods: {
     ...mapActions([
-      "beginAddingTask",
+      "updateTaskList",
     ]),
     newTask() {
-      this.beginAddingTask();
+      this.$router.push("/tasks/add");
     },
   },
 };

@@ -3,6 +3,7 @@ import Router from "vue-router";
 
 import TaskList from "@/views/TaskList.vue";
 import AddTask from "@/views/AddTask.vue";
+import EditTask from "@/views/EditTask.vue";
 
 Vue.use(Router);
 
@@ -25,6 +26,11 @@ export default new Router({
       component: AddTask
     },
     {
+      path: "/tasks/:id",
+      name: "editTask",
+      component: EditTask,
+    },
+    {
       path: "/about",
       name: "about",
       // route level code-splitting
@@ -32,6 +38,6 @@ export default new Router({
       // which is lazy-loaded when the route is visited.
       component: () =>
         import(/* webpackChunkName: "about" */ "./views/About.vue")
-    }
+    },
   ]
 });
