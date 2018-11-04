@@ -1,8 +1,17 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/tasks">Tasks</router-link> |
-      <router-link to="/about">About</router-link>
+      <h1>Taskful</h1>
+      <span class="link-holder">
+        <b-btn to="/tasks" variant="link" class="title-icon">
+          <v-icon name="tasks" scale="2" />
+          <span class="link-name">Tasks</span>
+        </b-btn>
+        <b-btn to="/analytics" variant="link" class="title-icon">
+          <v-icon name="chart-bar" scale="2" />
+          <span class="link-name">Analytics</span>
+        </b-btn>
+      </span>
     </div>
     <router-view/>
   </div>
@@ -17,12 +26,36 @@
   color: #2c3e50;
 }
 #nav {
+  display: flex;
+  flex-flow: row no-wrap;
+  justify-content: space-between;
+  align-items: center;
   padding: 30px;
-  a {
+
+  .link-holder {
+    display: flex;
+    flex-flow: row no-wrap;
+  }
+
+  .title-icon {
+    display: flex;
+    flex-flow: row no-wrap;
+    justify-content: space-between;
+    align-items: center;
+  
+    text-decoration: none;
     font-weight: bold;
-    color: #42b983;
-    &.router-link-exact-active {
+    color: var(--primary);
+
+    //TODO: fix bug where `.active` applies to sub-routes as well.
+    // Need to find alternative class. `<router-link/>` has some sort of
+    // "exact match" class.
+    &.active {
       color: #2c3e50;
+    }
+
+    .link-name {
+      padding-left: 15px;
     }
   }
 }
