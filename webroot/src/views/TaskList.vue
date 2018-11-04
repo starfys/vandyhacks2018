@@ -1,10 +1,10 @@
 <template>
   <section>
     <task-card
-      :animate="true"
       v-for="task in taskList"
       v-bind:key="task.id"
       v-bind:task="task"
+      :active="false"
       class="task-item"></task-card>
     <button class="fab" v-on:click="newTask()">
       <v-icon class="square" name="plus" scale="2.3" />
@@ -19,6 +19,9 @@
 .square {
   height: 50px;
   width: 50px;
+}
+.highlight-task {
+
 }
 .fab {
   position: absolute;
