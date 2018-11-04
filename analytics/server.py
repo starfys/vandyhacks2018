@@ -16,15 +16,14 @@ def get_new_work():
     # send to MS
     # return success=happy
     
-    json_dict = request.json
-    df = pd.read_json(json_dict, convert_dates=False)
+    df = pd.read_json(request.json, typ='series', convert_dates=False).to_frame().T
     
     print("Adding to dataset on Microstrategy")
     conn.update_dataset(data_frame=df, 
                         update_policy='add', 
                         dataset_id=dataset_id, 
                         table_name=table_name, 
-                        table_id=newTableId)
+                        table_id=new_table_id)
 
 
 base_url="https://env-113279.customer.cloud.microstrategy.com/MicroStrategyLibrary/api"
