@@ -39,11 +39,11 @@ export default {
       "modifyTask",
     ]),
     onSave() {
-      this.modifyTask(this.taskId, {
+      this.modifyTask([this.taskId, {
         name: this.task.name,
         description: this.task.description,
         due: Date.now(this.task.due),
-      });
+      }]);
     },
   },
 

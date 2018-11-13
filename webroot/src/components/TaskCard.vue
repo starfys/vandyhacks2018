@@ -1,7 +1,7 @@
 <template>
   <b-card class="task-card">
     <div class="shelf">
-      <h3 class="title"><b-badge class="shelf-badge">{{task.progress}}%</b-badge> {{task.name}}</h3>
+      <h3 class="title"><b-badge class="shelf-badge">{{localProgress}}%</b-badge> {{task.name}}</h3>
       <b-btn-group>
         <b-btn :href="editTaskUrl">
           <v-icon name="edit" scale="1" />
@@ -17,7 +17,7 @@
     <b-progress
       :striped="true"
       :animated="active"
-      :value="task.progress"
+      :value="localProgress"
       :max="100"
       class="prog-bar" />
   </b-card>
@@ -57,6 +57,9 @@ export default {
   },
 
   computed: {
+    localProgress() {
+      return Math.round(this.task.progress*100);
+    },
     editTaskUrl() {
       return `/tasks/${this.task.task_id}`;
     },

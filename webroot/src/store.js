@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import api from "@/api";
-//import router from "@/router";
+import router from "@/router";
 
 Vue.use(Vuex);
 
@@ -35,10 +35,8 @@ const taskModule = {
   },
 
   getters: {
-    taskById: state => id => {
-      const found = state.taskList.tasks.find(task=>task.task_id==id);
-      console.log("found",found);
-    },
+    taskById: state => id =>
+      state.taskList.tasks.find(task=>task.task_id==id),
   },
 
   mutations: {
@@ -65,7 +63,7 @@ const taskModule = {
       await dispatch("updateTaskList");
       return data;
     },
-    async modifyTask({ rootState, dispatch}, taskId, task) {
+    async modifyTask({ rootState, dispatch}, [taskId, task]) {
       const user = rootState.auth.user;
       const data = await api.tasks.modify(user, taskId, task);
       await dispatch("updateTaskList");
@@ -75,12 +73,8 @@ const taskModule = {
 };
 
 const workModule = {
-  /*state: {
-    inProgressTaskId: "",
-  },
-
-  getters: {
-    isTaskActive: state => state.inProgressTaskId != "",
+  /*getters: {
+    isTaskActive: state => state.inProgressTaskId != null,
   },*/
   
   actions: {
@@ -90,9 +84,10 @@ const workModule = {
       await dispatch("updateTaskList");
       return data;
     },
-    async finishWork({ rootState, dispatch}, taskId, workData) {
+    async finishWork({rootState, dispatch}, [taskId, progress, workData]) {
+      console.log("progress from finishWork", progress);
       const user = rootState.auth.user;
-      const data = await api.work.finish(user, taskId, workData);
+      const data = await api.work.finish(user, taskId, progress, workData);
       await dispatch("updateTaskList");
       return data;
     },

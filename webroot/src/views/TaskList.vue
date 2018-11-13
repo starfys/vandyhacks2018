@@ -6,7 +6,7 @@
       v-bind:task="task"
       :active="task.in_progress"
       class="task-item"></task-card>
-    <button class="fab" to="/tasks/add">
+    <button class="fab" @click="addTask()">
       <v-icon class="square" name="plus" scale="2.3" />
     </button>
   </section>
@@ -24,12 +24,12 @@
 
 }
 .fab {
-  position: absolute;
+  position: fixed;
   bottom: 20px;
   right: 20px;
   padding: 5px;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-  background: none;
+  background: var(--light);
   color: var(--primary);
   border: none;
   border-radius: 40px;
@@ -66,6 +66,9 @@ export default {
     ...mapActions([
       "updateTaskList",
     ]),
+    addTask() {
+      this.$router.push("/tasks/add");
+    },
   },
 };
 </script>

@@ -3,12 +3,12 @@
     <div id="nav">
       <h1>Taskful</h1>
       <span class="link-holder">
-        <b-btn to="/tasks" variant="link" class="title-icon">
-          <v-icon name="tasks" scale="2" />
+        <b-btn to="/tasks" exact variant="link" class="title-icon">
+          <v-icon name="tasks" scale="1.7" />
           <span class="link-name">Tasks</span>
         </b-btn>
-        <b-btn to="/analytics" variant="link" class="title-icon">
-          <v-icon name="chart-bar" scale="2" />
+        <b-btn to="/analytics" exact variant="link" class="title-icon">
+          <v-icon name="chart-bar" scale="1.7" />
           <span class="link-name">Analytics</span>
         </b-btn>
       </span>
@@ -55,7 +55,7 @@
     }
 
     .link-name {
-      padding-left: 15px;
+      padding-left: 12px;
     }
   }
 }

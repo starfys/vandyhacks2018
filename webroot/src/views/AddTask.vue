@@ -13,9 +13,11 @@ import TaskInput from "@/components/TaskInput";
 export default {
   data() {
     return {
-      name: "",
-      description: "",
-      due: "",
+      task: {
+        name: "",
+        description: "",
+        due: "",
+      },
     };
   },
   methods: {
@@ -24,10 +26,11 @@ export default {
     ]),
     finalize() {
       this.addTask({
-        name: this.name,
-        description: this.description,
-        due: Date.now(this.due),
+        name: this.task.name,
+        description: this.task.description,
+        due: Date.now(this.task.due),
       });
+      this.$router.push("/tasks");
     },
   },
 
