@@ -8,61 +8,101 @@ Vue.use(Vuex);
 
 const authModule = {
   state: {
-    user: null,
+    user: {
+      id: 0, // TEMP variable
+    },
+  },
+
+  mutations: {
+    setUser(state, user) {
+      state.user = user;
+    },
+  },
+
+  actions: {
+    async signUp({commit}) {
+      const user = await api.users.add();
+      commit("setUser", user);
+    },
   },
 };
 
 const taskModule = {
-  getters: {
-    currentlyBuildingTask(state) {
-      return state.taskAdd.currentTask !== null;
-    }
-  },
   state: {
     taskList: {
       tasks: [],
     },
-    taskAdd: {
-      currentTask: null,
-    },
   },
+
+  getters: {
+    taskById: state => id =>
+      state.taskList.tasks.find(task=>task.task_id==id),
+  },
+
   mutations: {
     setTaskList(state, newList) {
       state.taskList.tasks = [...newList];
     },
-    initTaskAdd(state) {
-      state.taskAdd.currentTask = {};
-    },
-    resetTaskAdd(state) {
-      state.taskAdd.currentTask = null;
-    },
+    /*updateTask(state, taskId, newTask) {
+      const tasks = state.taskList.tasks;
+      const index = tasks.findIndex(({id})=>id === taskId);
+      state.taskList.tasks[index] = newTask;
+    },*/
   },
+
   actions: {
     async updateTaskList({rootState, commit}) {
       const user = rootState.auth.user;
-      const data = await api.list(user);
+      const data = await api.tasks.list(user);
       commit("setTaskList", data);
     },
-    async addTask({ rootState, dispatch, commit }, task) {
+    // Add a task to the backend
+    async addTask({ rootState, dispatch }, task) {
       const user = rootState.auth.user;
-      const returnedTask = await api.tasks.add(user, task);
+      const data = await api.tasks.add(user, task);
       await dispatch("updateTaskList");
+      return data;
     },
-    beginAddingTask({commit}) {
-      router.push("/task/add");
-      commit("initTaskAdd");
-    },
-    async finishAddingTask({state, commit}) {
-      const task = state.taskAdd.currentTask;
-      await dispatch("addTask", task);
-      commit("resetTaskAdd");
+    async modifyTask({ rootState, dispatch}, [taskId, task]) {
+      const user = rootState.auth.user;
+      const data = await api.tasks.modify(user, taskId, task);
+      await dispatch("updateTaskList");
+      return data;
     },
   },
 };
 
-export default new Vuex.Store({
+const workModule = {
+  /*getters: {
+    isTaskActive: state => state.inProgressTaskId != null,
+  },*/
+  
+  actions: {
+    async startWork({ rootState, dispatch}, taskId) {
+      const user = rootState.auth.user;
+      const data = await api.work.start(user, taskId);
+      await dispatch("updateTaskList");
+      return data;
+    },
+    async finishWork({rootState, dispatch}, [taskId, progress, workData]) {
+      console.log("progress from finishWork", progress);
+      const user = rootState.auth.user;
+      const data = await api.work.finish(user, taskId, progress, workData);
+      await dispatch("updateTaskList");
+      return data;
+    },
+  },
+};
+
+const store = new Vuex.Store({
   modules: {
     tasks: taskModule,
     auth: authModule,
+    work: workModule,
   },
-})
+});
+
+// initial setup of store:
+store.dispatch("updateTaskList");
+
+export default store;

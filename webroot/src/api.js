@@ -12,11 +12,17 @@ export default {
       return res.data;
     },
     async add(user, task) {
-      const res = await api.post(`/user/${user.id}/task`, task);
+      const res = await api.post(`/user/${user.id}/task`, {
+        owner_id: user.id,
+        created: Date.now() * 1000,
+        importance: 0,
+        due: task.due * 1000,
+        name: task.name,
+        description: task.description,
+      });
 
       return res.data;
-    },
-    async delete(user, taskId) {
+    }, async delete(user, taskId) {
       const res = await api.delete(`/user/${user.id}/task/${taskId}`);
 
       return res.data;
@@ -34,16 +40,28 @@ export default {
 
       return res.data;
     },
-    async finish(user, taskId, workData) {
+    async finish(user, taskId, updatedProgress, questionAnswers) {
+      console.log(updatedProgress);
+      const reqBody = {
+          finished: false,
+          progress: Number(updatedProgress)/100,
+          noise: Number(questionAnswers.noise),
+          interruptions: Number(questionAnswers.interruptions),
+          meetings: Number(questionAnswers.meetings),
+          music: questionAnswers.music,
+      };
+
+      console.log(reqBody);
+        
       const res = await api.post(
-        `/user/${user.id}/task/${taskId}/finish`, workData);
+        `/user/${user.id}/task/${taskId}/finish`, reqBody);
 
       return res.data;
     },
   },
 
   users: {
-    async add(user, userData) {
+    async add() {
       const res = await api.post(`/user`);
 
       return res.data;
